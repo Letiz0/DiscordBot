@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using DiscordBot.Services;
 using DiscordBot.Models;
 
@@ -11,12 +12,17 @@ namespace DiscordBot
 {
     internal class Bot
     {
+        private readonly string _token;
         private readonly ImageService _service;
         List<ImageRepository> _images = new();
 
         public Bot(ImageService service)
         {
-            _service = service;            
+            var configuration = new ConfigurationBuilder()
+               .AddUserSecrets<Bot>()
+               .Build();
+            _token = configuration["DiscordBotToken"];
+            _service = service;
         }
 
         public async Task MainAsync()
@@ -25,7 +31,7 @@ namespace DiscordBot
 
             var discord = new DiscordClient(new DiscordConfiguration()
             {
-                Token = "MTAyNTM3MzMxNzExODU2NjQ4Mg.GGQRPP.XcdTmN9vJgYKpGBgGiMjUYof7bZEkjvfNHzfcU",
+                Token = _token,
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.All
             });
@@ -102,9 +108,14 @@ namespace DiscordBot
                 return "格式反了==";
             }
 
-            if (!(url.EndsWith(".jpg") || url.EndsWith(".png") || url.EndsWith(".gif")))
+            if (!(url.Contains("jpg") || url.Contains("png") || url.Contains("gif")))
             {
-                return "只接受jpg, png, gif結尾之連結";
+                return "只接受jpg, png, gif之連結";
+            }
+
+            if (_images.Select(x => x.Url).ToList().Contains(url))
+            {
+                return "已存在此圖片, 關鍵字是 " + _images.Where(x => x.Url == url).FirstOrDefault()!.Keyword;
             }
 
             ImageRepository image = new ImageRepository
