@@ -35,5 +35,12 @@ namespace DiscordBot.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddCalledCountAsync(ImageRepository image)
+        {
+            image.CalledCount++ ;
+            _context.Entry(image).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

@@ -8,5 +8,6 @@ namespace DiscordBot.Models
         public int Id { get; set; }
         public string Url { get; set; } = null!;
         public string Keyword { get; set; } = null!;
+        public int CalledCount { get; set; }
     }
 }
