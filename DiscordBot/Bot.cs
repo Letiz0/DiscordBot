@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using DiscordBot.Services;
 using DiscordBot.Models;
 using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
 
 namespace DiscordBot
 {
@@ -95,6 +96,10 @@ namespace DiscordBot
                 }
                 
             };
+
+            var slash = discord.UseSlashCommands();
+            slash.RegisterCommands<SlashCommands>();
+
             await discord.ConnectAsync();
             await Task.Delay(-1);
         }
