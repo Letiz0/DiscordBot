@@ -106,15 +106,10 @@ namespace DiscordBot
                 return null;
             }
 
-            foreach (var image in _images)
-            {
-                if (message.Equals("!" + image.Keyword) || message.Equals("！" + image.Keyword))
-                {
-                    return image;
-                }
-            }
+            var image = _images.Where(x => "!" + x.Keyword == message || "！" + x.Keyword == message)
+                .FirstOrDefault();
 
-            return null;
+            return image;
         }
 
         private async Task<string> AddImageAsync(string keyword, string url)
