@@ -12,11 +12,12 @@ namespace DiscordBot
     internal class SlashCommands : ApplicationCommandModule
     {
         [SlashCommand("p", "呼叫圖片")]
-        public async Task ChoiceProviderCommand(InteractionContext ctx,
-            [ChoiceProvider(typeof(MyChoiceProvider))]
-            [Option("關鍵字", "圖片之關鍵字")] string option)
+        public async Task AutocompleteCommand(InteractionContext ctx,
+            [Autocomplete(typeof(AutocompleteProvider))]
+            [Option("keyword", "keyword")] string imageId)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent(option));
+            var result = Bot.Images.First(x => x.Id == Convert.ToInt32(imageId)).Url;
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent(result));
         }
     }
 }

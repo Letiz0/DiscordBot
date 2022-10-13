@@ -16,7 +16,7 @@ namespace DiscordBot
     {
         private readonly string _token;
         private readonly ImageService _service;
-        List<ImageRepository> _images = new();
+        public static List<ImageRepository> Images { get; private set; } = new();
 
         public Bot(ImageService service)
         {
@@ -29,7 +29,7 @@ namespace DiscordBot
 
         public async Task MainAsync()
         {
-            _images = await _service.GetAsync();
+            Images = await _service.GetAsync();
 
             var discord = new DiscordClient(new DiscordConfiguration()
             {                 
@@ -111,7 +111,7 @@ namespace DiscordBot
                 return null;
             }
 
-            var image = _images.Where(x => "!" + x.Keyword == message || "！" + x.Keyword == message)
+            var image = Images.Where(x => "!" + x.Keyword == message || "！" + x.Keyword == message)
                 .FirstOrDefault();
 
             return image;
@@ -119,7 +119,7 @@ namespace DiscordBot
 
         private async Task<string> AddImageAsync(string keyword, string url)
         {
-            if (_images.Select(x => x.Keyword).ToList().Contains(keyword))
+            if (Images.Select(x => x.Keyword).ToList().Contains(keyword))
             {
                 return "此關鍵字已存在於圖庫內";
             }
@@ -134,9 +134,9 @@ namespace DiscordBot
                 return "只接受jpg, png, gif, mp4之連結";
             }
 
-            if (_images.Select(x => x.Url).ToList().Contains(url))
+            if (Images.Select(x => x.Url).ToList().Contains(url))
             {
-                return "已存在此圖片, 關鍵字是 " + _images.Where(x => x.Url == url).FirstOrDefault()!.Keyword;
+                return "已存在此圖片, 關鍵字是 " + Images.Where(x => x.Url == url).FirstOrDefault()!.Keyword;
             }
 
             ImageRepository image = new ImageRepository
@@ -146,21 +146,21 @@ namespace DiscordBot
             };
 
             await _service.AddAsync(image);
-            _images = await _service.GetAsync();
+            Images = await _service.GetAsync();
 
             return keyword + " 成功加入圖庫";
         }
 
         private async Task<string> DeleteImageAsync(string keyword)
         {
-            if (!_images.Select(x => x.Keyword).ToList().Contains(keyword))
+            if (!Images.Select(x => x.Keyword).ToList().Contains(keyword))
             {
                 return "此關鍵字不在圖庫內";
             }
 
-            var image = _images.Where(x => x.Keyword == keyword).FirstOrDefault();
+            var image = Images.Where(x => x.Keyword == keyword).FirstOrDefault();
             await _service.DeleteAsync(image!);
-            _images = await _service.GetAsync();
+            Images = await _service.GetAsync();
 
             return keyword + " 已成功刪除";
         }
@@ -169,7 +169,7 @@ namespace DiscordBot
         {
             string keywords = "";
 
-            foreach (var image in _images)
+            foreach (var image in Images)
             {
                 keywords += image.Keyword + "\n";
             }
