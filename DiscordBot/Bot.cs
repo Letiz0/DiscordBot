@@ -9,6 +9,9 @@ using DiscordBot.Services;
 using DiscordBot.Models;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using Microsoft.Extensions.DependencyInjection;
+using DSharpPlus.CommandsNext;
+using Microsoft.EntityFrameworkCore;
 
 namespace DiscordBot
 {
@@ -17,13 +20,14 @@ namespace DiscordBot
         private readonly string _token;
         private readonly ImageService _service;
         public static List<ImageRepository> Images { get; private set; } = new();
+        IConfiguration _configuration = new ConfigurationBuilder()
+            .AddUserSecrets<Bot>()
+            .Build();
 
         public Bot(ImageService service)
         {
-            var configuration = new ConfigurationBuilder()
-               .AddUserSecrets<Bot>()
-               .Build();
-            _token = configuration["DiscordBotToken"];
+
+            _token = _configuration["DiscordBotToken"];
             _service = service;
         }
 
@@ -32,7 +36,7 @@ namespace DiscordBot
             Images = await _service.GetAsync();
 
             var discord = new DiscordClient(new DiscordConfiguration()
-            {                 
+            {
                 Token = _token,
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.All
@@ -41,13 +45,13 @@ namespace DiscordBot
             discord.MessageCreated += async (s, e) =>
             {
                 var message = e.Message.Content;
-                
+
                 if (e.Message.Author.IsBot)
                 {
                     return;
                 }
 
-                if(message == "!B哥")
+                if (message == "!B哥")
                 {
                     await e.Message.RespondAsync("<@!346117587509313536>");
                     return;
@@ -94,10 +98,20 @@ namespace DiscordBot
                     await _service.AddCalledCountAsync(image);
                     await e.Message.RespondAsync(image.Url);
                 }
-                
+
             };
 
-            var slash = discord.UseSlashCommands();
+            var services = new ServiceCollection()
+                .AddSingleton<ImageService>()
+                .AddDbContext<DiscordBotContext>(options =>
+                    options.UseSqlServer(_configuration.GetConnectionString("DiscordBotDb")))
+                .BuildServiceProvider();
+
+            var slash = discord.UseSlashCommands(new SlashCommandsConfiguration()
+            {
+                Services = services
+            });
+
             slash.RegisterCommands<SlashCommands>();
 
             await discord.ConnectAsync();
@@ -140,7 +154,7 @@ namespace DiscordBot
             }
 
             ImageRepository image = new ImageRepository
-            { 
+            {
                 Keyword = keyword,
                 Url = url
             };
