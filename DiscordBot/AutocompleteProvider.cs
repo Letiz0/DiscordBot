@@ -12,14 +12,19 @@ namespace DiscordBot
     {
         public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx)
         {
-            List<DiscordAutoCompleteChoice> autocomplete = new();
+            IEnumerable<DiscordAutoCompleteChoice> options;
 
-            foreach (var item in Bot.Images.Where(x => x.Keyword.Contains(ctx.FocusedOption.Value.ToString())))
+            if (ctx.FocusedOption.Value.ToString() == "")
             {
-                autocomplete.Add(new DiscordAutoCompleteChoice(item.Keyword, "" + item.Id));
+                options = Bot.Images.Take(25).Select(x => new DiscordAutoCompleteChoice(x.Keyword, x.Id.ToString()));
             }
-            
-           return autocomplete;
+            else
+            {
+                options = Bot.Images.Where(x => x.Keyword.Contains(ctx.FocusedOption.Value.ToString()!))
+                    .Select(x => new DiscordAutoCompleteChoice(x.Keyword, x.Id.ToString()));
+            }
+
+            return options;
         }
     }
 }

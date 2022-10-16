@@ -17,18 +17,23 @@ namespace DiscordBot
 {
     internal class Bot
     {
+        public static List<ImageRepository> Images { get; private set; } = new();
+
         private readonly string _token;
         private readonly ImageService _service;
-        public static List<ImageRepository> Images { get; private set; } = new();
-        IConfiguration _configuration = new ConfigurationBuilder()
+        private readonly IConfiguration _configuration = new ConfigurationBuilder()
             .AddUserSecrets<Bot>()
             .Build();
 
         public Bot(ImageService service)
         {
-
             _token = _configuration["DiscordBotToken"];
             _service = service;
+        }
+
+        public static void SortImagesByCalledCount()
+        {
+            Images.Sort((x, y) => y.CalledCount.CompareTo(x.CalledCount));
         }
 
         public async Task MainAsync()
@@ -95,8 +100,9 @@ namespace DiscordBot
 
                 if (GetImage(message) is ImageRepository image)
                 {
-                    await _service.AddCalledCountAsync(image);
                     await e.Message.RespondAsync(image.Url);
+                    await _service.AddCalledCountAsync(image);
+                    SortImagesByCalledCount();
                 }
 
             };

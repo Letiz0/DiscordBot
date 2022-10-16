@@ -19,7 +19,7 @@ namespace DiscordBot.Services
 
         public async Task<List<ImageRepository>> GetAsync()
         {
-            var result = await _context.ImageRepositories.ToListAsync();
+            var result = await _context.ImageRepositories.OrderByDescending(x => x.CalledCount).ToListAsync();
             return result;
         }
 
