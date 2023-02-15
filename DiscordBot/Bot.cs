@@ -17,7 +17,7 @@ namespace DiscordBot
 {
     internal class Bot
     {
-        public static List<ImageRepository> Images { get; private set; } = new();
+        public static List<ImageRepository> Images { get; set; } = new();
 
         private readonly string _token;
         private readonly ImageService _service;
@@ -56,29 +56,13 @@ namespace DiscordBot
                     return;
                 }
 
-                if (message == "!B哥")
-                {
-                    await e.Message.RespondAsync("<@!346117587509313536>");
-                    return;
-                }
-
-                if (message == "!說要加薪")
-                {
-                    await e.Message.RespondAsync("也沒加 也不是儲備幹部的薪水 說有業續達標 績效獎金 戶頭看還是31000 講的跟做的都一套還信誓旦旦跟我說說到做到 沒差 我月底走人也是說到做到 每天花1個小時 每天下來白工");
-                    return;
-                }
-
-                if (message == "!不夠愛")
-                {
-                    await e.Message.RespondAsync("裝備錢是我花的 飾品也是我送的 書也是我給的 金牌也是我打的 時裝也是我花錢 每天周末就被當透明人 然後還被嫌不夠愛");
-                    return;
-                }
-
                 if ((message.StartsWith("!加圖") || message.StartsWith("！加圖")) && message.Split(' ').Length == 3)
                 {
                     string[] command = message.Split(' ');
                     var respond = await AddImageAsync(command[1], command[2]);
                     await e.Message.RespondAsync(respond);
+                    await e.Message.RespondAsync("驚嘆號即將移除，請改為使用斜線指令/a " + $"<@!{e.Author.Id}>");
+                    await e.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(discord, 966394654402691094));
 
                     return;
                 }
@@ -98,9 +82,28 @@ namespace DiscordBot
                     return;
                 }
 
+                //if(message == "!測試")
+                //{
+                //    var respond = "";
+
+                //    foreach (var item in e.Guild.Emojis.Skip(75).Take(15))
+                //    {
+                //        respond += $"{item.Value}, {item.Key} \n";
+                //    }                    
+
+                //    await e.Message.RespondAsync(respond);
+                //}
+
+                //if (e.Author.Id == 112499724191313920)
+                //{
+                //    await e.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(discord, 966394654402691094));
+                //}
+
                 if (GetImage(message) is ImageRepository image)
                 {
                     await e.Message.RespondAsync(image.Url);
+                    await e.Message.RespondAsync("驚嘆號即將移除，請改為使用斜線指令/p " + $"<@!{e.Author.Id}>");
+                    await e.Message.CreateReactionAsync(DiscordEmoji.FromGuildEmote(discord, 966394654402691094));
                     await _service.AddCalledCountAsync(image);
                     SortImagesByCalledCount();
                 }

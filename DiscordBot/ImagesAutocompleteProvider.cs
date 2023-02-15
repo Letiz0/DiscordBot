@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot
 {
-    internal class AutocompleteProvider : IAutocompleteProvider
+    internal class ImagesAutocompleteProvider : IAutocompleteProvider
     {
         public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx)
         {
